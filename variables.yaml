@@ -1,0 +1,39 @@
+# Access Policy variables
+access_policies: 
+  - name: app1l101p30
+    aep: AEP1
+    link_level: 10G
+    cdp: CDP_OFF
+    lldp: LLDP_ON
+    mcp: MCP_ON
+    lag: leaf
+    leaf_profile: Leaf101
+    port: 30
+  - name: app1l101p31
+    aep: AEP1
+    link_level: 10G
+    cdp: CDP_OFF
+    lldp: LLDP_ON
+    mcp: MCP_ON
+    lag: leaf
+    leaf_profile: Leaf101
+    port: 31
+
+
+# Tenant variables
+tenant: Tenant1
+vrf: VRF1
+bd: BD
+app_prof: test
+epg: BlueWave
+descr: "EPG for the BlueWave Application"
+vlan: 222
+pod_id: 1
+leaf: 101
+interface_mode: untagged
+int_type: switch_port
+domain: baremetal_physDom
+domain_type: phys
+
+contract_name: BlueWave_to_Gator
+contract_descr: Communication between BlueWave app to Gator DB

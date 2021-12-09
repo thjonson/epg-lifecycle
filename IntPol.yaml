@@ -1,0 +1,50 @@
+---
+- name: Configure fabric access policies
+  hosts: apic
+  gather_facts: no
+
+  # Use aci_login as an anchor
+  vars:
+    aci_login: &aci_login
+      host: '{{ inventory_hostname }}'
+      username: '{{ username }}'
+      password: '{{ password }}'
+#      private_key: "{{ private_key }}"
+#      certificate_name: "{{ certificate_name }}"
+      validate_certs: no
+      state: "present"
+      #state: "absent"
+      use_proxy: no
+
+  tasks:
+    #Create interface policies
+    - name: Create LLDP policy
+      cisco.aci.aci_interface_policy_lldp:
+        <<: *aci_login
+        lldp_policy: LLDP_ENABLED
+        receive_state: yes
+        transmit_state: yes
+      delegate_to: localhost
+
+    - name: Create LLDP policy
+      cisco.aci.aci_interface_policy_lldp:
+        <<: *aci_login
+        lldp_policy: LLDP_DISABLED
+        receive_state: no
+        transmit_state: no
+      delegate_to: localhost
+
+    - name: Create CDP policy
+      cisco.aci.aci_interface_policy_cdp:
+        <<: *aci_login
+        cdp_policy: CDP_ENABLED
+        admin_state: yes
+      delegate_to: localhost
+
+    - name: Create CDP policy
+      cisco.aci.aci_interface_policy_cdp:
+        <<: *aci_login
+        cdp_policy: CDP_DISABLED
+        admin_state: no
+      delegate_to: localhost
+

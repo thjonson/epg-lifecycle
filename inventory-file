@@ -1,0 +1,13 @@
+[apic]
+172.16.33.100
+
+[sandbox]
+sandbox.cisco.com
+
+[apic:vars]
+username = 'ansible'
+password = 'ansible123'
+
+[sandbox:vars]
+username = 'admin'
+password = '!v3G@!4@Y'

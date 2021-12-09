@@ -1,0 +1,123 @@
+---
+- name: Configure fabric access policies
+  hosts: apic
+  gather_facts: no
+
+  # Use aci_login as an anchor
+  vars:
+    aci_login: &aci_login
+      host: '{{ inventory_hostname }}'
+      username: '{{ username }}'
+      password: '{{ password }}'
+#      private_key: "{{ private_key }}"
+#      certificate_name: "{{ certificate_name }}"
+      validate_certs: no
+      state: "{{ state_cli }}"
+      #state: "present"
+      #state: "absent"
+      use_proxy: no
+
+  tasks:
+#    - name: Create an Interface Policy Group
+#      cisco.aci.aci_interface_policy_leaf_policy_group:
+#        <<: *aci_login
+#        policy_group: "{{ name }}"
+#        aep: "{{ aep }}"
+#        link_level_policy: "{{ link_level }}"
+#        cdp_policy: "{{ cdp }}"
+#        lldp_policy: "{{ lldp }}"
+#        mcp_policy: "{{ mcp }}"
+#        lag_type: "{{ lag }}"
+#      delegate_to: localhost
+#
+#    - name: Associate an Interface Access Port Selector to an Interface Policy Leaf Profile with a Policy Group
+#      cisco.aci.aci_access_port_to_interface_policy_leaf_profile:
+#        <<: *aci_login
+#        interface_profile: "{{ leaf_profile }}"
+#        access_port_selector: "{{ name }}-sel"
+#        port_blk: leafportblkname
+#        from_port: "{{ port }}"
+#        to_port: "{{ port }}"
+#        policy_group: "{{ name }}"
+#      delegate_to: localhost
+
+    - name: Create an Interface Policy Group
+      cisco.aci.aci_interface_policy_leaf_policy_group:
+        <<: *aci_login
+        policy_group: "{{ item.name }}"
+        aep: "{{ item.aep }}"
+        link_level_policy: "{{ item.link_level }}"
+        cdp_policy: "{{ item.cdp }}"
+        lldp_policy: "{{ item.lldp }}"
+        mcp_policy: "{{ item.mcp }}"
+        lag_type: "{{ item.lag }}"
+      delegate_to: localhost
+      with_items: "{{ access_policies }}"
+
+    - name: Associate an Interface Access Port Selector to an Interface Policy Leaf Profile with a Policy Group
+      cisco.aci.aci_access_port_to_interface_policy_leaf_profile:
+        <<: *aci_login
+        interface_profile: "{{ item.leaf_profile }}"
+        access_port_selector: "{{ item.name }}-sel"
+        port_blk: leafportblkname
+        from_port: "{{ item.port }}"
+        to_port: "{{ item.port }}"
+        policy_group: "{{ item.name }}"
+      delegate_to: localhost
+      with_items: "{{ access_policies }}"
+
+    - name: Create new EPG
+      cisco.aci.aci_epg:
+        <<: *aci_login
+        tenant: "{{ tenant }}"
+        ap: "{{ app_prof }}"
+        epg: "{{ epg }}"
+        description: "{{ descr }}"
+        bd: "{{ bd }}"
+      delegate_to: localhost
+
+    - name: Add a new physical domain to EPG binding
+      cisco.aci.aci_epg_to_domain:
+        <<: *aci_login
+        tenant: "{{ tenant }}"
+        ap: "{{ app_prof }}"
+        epg: "{{ epg }}"
+        domain: "{{ domain }}"
+        domain_type: "{{ domain_type }}"
+      delegate_to: localhost
+
+    - name: Deploy Static Path binding for given EPG
+      cisco.aci.aci_static_binding_to_epg:
+        <<: *aci_login
+        tenant: "{{ tenant }}"
+        ap: "{{ app_prof }}"
+        epg: "{{ epg }}"
+        encap_id: "{{ vlan }}"
+        deploy_immediacy: lazy
+        interface_mode: "{{ interface_mode }}"
+        interface_type: "{{ int_type }}"
+        pod_id: "{{ pod_id }}"
+        leafs: "{{ leaf }}"
+        interface: "1/{{item.port}}"
+      delegate_to: localhost
+      with_items: "{{ access_policies }}"
+
+
+    - name: Add a new contract
+      cisco.aci.aci_contract:
+        <<: *aci_login
+        tenant: "{{ tenant }}"
+        contract: "{{ contract_name }}"
+        description: "{{ contract_descr }}"
+        scope: application-profile
+      delegate_to: localhost
+
+    - name: Add a new contract to EPG binding
+      cisco.aci.aci_epg_to_contract:
+        <<: *aci_login
+        tenant: "{{ tenant }}"
+        ap: "{{ app_prof }}"
+        epg: "{{ epg }}"
+        contract: "{{ contract_name }}"
+        contract_type: provider
+      delegate_to: localhost
