@@ -18,6 +18,15 @@ access_policies:
     lag: leaf
     leaf_profile: Leaf101
     port: 31
+  - name: app1l101p32
+    aep: AEP1
+    link_level: 10G
+    cdp: CDP_OFF
+    lldp: LLDP_ON
+    mcp: MCP_ON
+    lag: leaf
+    leaf_profile: Leaf101
+    port: 32
 
 
 # Tenant variables
@@ -27,7 +36,7 @@ bd: BD
 app_prof: test
 epg: BlueWave
 descr: "EPG for the BlueWave Application"
-vlan: 222
+vlan: 223
 pod_id: 1
 leaf: 101
 interface_mode: untagged
